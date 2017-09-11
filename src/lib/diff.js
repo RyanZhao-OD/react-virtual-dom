@@ -2,23 +2,25 @@ import _ from './util';
 import patch from './patch';
 import listDiff from 'list-diff2';
 
+// diff 函数，对比两棵树
 function diff(oldTree, newTree) {
-    const index = 0;
-    let patches = {};
+    const index = 0;    // 当前节点的标志
+    let patches = {};   // 用来记录每个节点差异的对象
     dfsWalk(oldTree, newTree, index, patches);
     return patches;
 }
 
+// 对两棵树进行深度优先遍历
 function dfsWalk(oldNode, newNode, index, patches) {
     let currentPatch = [];
 
     // Node is removed.
     if (newNode === null) {
-        // Real DOM node will be removed when perform reordering, so has no needs to do anthings in here
+        // Real DOM node will be removed when perform reordering, so has no needs to do anything in here
         // TextNode content replacing
     } else if (_.isString(oldNode) && _.isString(newNode)) {
         if (newNode !== oldNode) {
-            currentPatch.push({type: patch.TEXT, content: newNode})
+            currentPatch.push({type: patch.TEXT, content: newNode});
         }
         // Nodes are the same, diff old node's props and children
     } else if (
@@ -38,7 +40,7 @@ function dfsWalk(oldNode, newNode, index, patches) {
                 index,
                 patches,
                 currentPatch
-            )
+            );
         }
         // Nodes are not the same, replace the old node with new node
     } else {
@@ -46,6 +48,7 @@ function dfsWalk(oldNode, newNode, index, patches) {
     }
 
     if (currentPatch.length) {
+        // 对比oldNode和newNode的不同，记录下来
         patches[index] = currentPatch;
     }
 }
@@ -55,17 +58,21 @@ function diffChildren(oldChildren, newChildren, index, patches, currentPatch) {
     newChildren = diffs.children;
 
     if (diffs.moves.length) {
-        var reorderPatch = {type: patch.REORDER, moves: diffs.moves};
+        let reorderPatch = {type: patch.REORDER, moves: diffs.moves};
         currentPatch.push(reorderPatch);
     }
 
     let leftNode = null;
     let currentNodeIndex = index;
     _.each(oldChildren, (child, i) => {
-        var newChild = newChildren[i];
+        let newChild = newChildren[i];
+
+        // 计算节点的标识
         currentNodeIndex = (leftNode && leftNode.count)
             ? currentNodeIndex + leftNode.count + 1
             : currentNodeIndex + 1;
+
+        // 深度遍历子节点
         dfsWalk(child, newChild, currentNodeIndex, patches);
         leftNode = child;
     });

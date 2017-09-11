@@ -12,7 +12,7 @@ import _ from './util';
 export default class Element {
     constructor(tagName, props, children) {
         if (!_.isArray(children) && children != null) {
-            children = _.slice(arguments, 2).filter(_.truthy)
+            children = _.slice(arguments, 2).filter(_.truthy);
         }
 
         if (_.isArray(props)) {
@@ -23,17 +23,22 @@ export default class Element {
         this.tagName = tagName;
         this.props = props || {};
         this.children = children || [];
-        this.key = props
-            ? props.key
-            : void 666;
+        this.key = props ? props.key : void 666;
 
         let count = 0;
 
         _.each(this.children, (child, i) => {
+            if (tagName === 'div') {
+                console.log('-----');
+                console.log(count);
+            }
             if (child instanceof Element) {
                 count += child.count;
             } else {
                 children[i] = '' + child;
+            }
+            if (tagName === 'div') {
+                console.log(count);
             }
             count++;
         });
@@ -48,8 +53,8 @@ export default class Element {
         let el = document.createElement(this.tagName);
         let props = this.props;
 
-        for (var propName in props) {
-            var propValue = props[propName];
+        for (let propName in props) {
+            let propValue = props[propName];
             _.setAttr(el, propName, propValue);
         }
 

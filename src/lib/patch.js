@@ -1,23 +1,21 @@
-var _ = require('./util');
+import _ from './util';
 
-var REPLACE = 0;
-var REORDER = 1;
-var PROPS = 2;
-var TEXT = 3;
+const REPLACE = 'replace';    // 替换掉原来的节点
+const REORDER = 'reorder';    // 移动、删除、新增子节点
+const PROPS = 'props';      // 修改了节点的属性
+const TEXT = 'text';       // 对于文本节点，文本内容可能会改变。
 
 function patch(node, patches) {
-    var walker = {index: 0};
+    let walker = {index: 0};
     dfsWalk(node, walker, patches);
 }
 
 function dfsWalk(node, walker, patches) {
-    var currentPatches = patches[walker.index];
+    let currentPatches = patches[walker.index];
 
-    var len = node.childNodes
-        ? node.childNodes.length
-        : 0;
-    for (var i = 0; i < len; i++) {
-        var child = node.childNodes[i];
+    let len = node.childNodes ? node.childNodes.length : 0;
+    for (let i = 0; i < len; i++) {
+        let child = node.childNodes[i];
         walker.index++;
         dfsWalk(child, walker, patches);
     }
@@ -28,10 +26,10 @@ function dfsWalk(node, walker, patches) {
 }
 
 function applyPatches(node, currentPatches) {
-    _.each(currentPatches, function (currentPatch) {
+    _.each(currentPatches, currentPatch => {
         switch (currentPatch.type) {
             case REPLACE:
-                var newNode = (typeof currentPatch.node === 'string')
+                let newNode = (typeof currentPatch.node === 'string')
                     ? document.createTextNode(currentPatch.node)
                     : currentPatch.node.render();
                 node.parentNode.replaceChild(newNode, node);
@@ -57,51 +55,51 @@ function applyPatches(node, currentPatches) {
 }
 
 function setProps(node, props) {
-    for (var key in props) {
+    for (let key in props) {
         if (props[key] === void 666) {
             node.removeAttribute(key);
         } else {
-            var value = props[key]
+            let value = props[key]
             _.setAttr(node, key, value);
         }
     }
 }
 
 function reorderChildren(node, moves) {
-    var staticNodeList = _.toArray(node.childNodes);
-    var maps = {};
+    let staticNodeList = _.toArray(node.childNodes);
+    let maps = {};
 
-    _.each(staticNodeList, function (node) {
+    _.each(staticNodeList, node => {
         if (node.nodeType === 1) {
-            var key = node.getAttribute('key');
+            let key = node.getAttribute('key');
             if (key) {
                 maps[key] = node;
             }
         }
     });
 
-    _.each(moves, function (move) {
-        var index = move.index;
+    _.each(moves, move => {
+        let index = move.index;
         if (move.type === 0) { // remove item
             if (staticNodeList[index] === node.childNodes[index]) { // maybe have been removed for inserting
-                node.removeChild(node.childNodes[index])
+                node.removeChild(node.childNodes[index]);
             }
-            staticNodeList.splice(index, 1)
+            staticNodeList.splice(index, 1);
         } else if (move.type === 1) { // insert item
-            var insertNode = maps[move.item.key]
+            let insertNode = maps[move.item.key]
                 ? maps[move.item.key].cloneNode(true) // reuse old item
                 : (typeof move.item === 'object')
                     ? move.item.render()
-                    : document.createTextNode(move.item)
-            staticNodeList.splice(index, 0, insertNode)
-            node.insertBefore(insertNode, node.childNodes[index] || null)
+                    : document.createTextNode(move.item);
+            staticNodeList.splice(index, 0, insertNode);
+            node.insertBefore(insertNode, node.childNodes[index] || null);
         }
     })
 }
 
-patch.REPLACE = REPLACE
-patch.REORDER = REORDER
-patch.PROPS = PROPS
-patch.TEXT = TEXT
+patch.REPLACE = REPLACE;
+patch.REORDER = REORDER;
+patch.PROPS = PROPS;
+patch.TEXT = TEXT;
 
-module.exports = patch
+export default patch;

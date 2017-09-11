@@ -5,34 +5,37 @@ import patch from './lib/patch';
 
 let count = 0;
 
-const renderTree  = () => {
+const renderTree = () => {
     count++;
 
     let items = [];
-    let color = (count % 2 === 0)
-        ? 'blue'
-        : 'red';
+    let color = (count & 1) === 0 ? 'blue' : 'red';
 
-    for (var i = 0; i < count; i++) {
-        items.push(new Element('li', ['Item #' + i]));
+    for (let i = 0; i < count; i++) {
+        items.push(new Element('li', [`Item #${i}`]));
     }
 
-    return new Element('div', {'id': 'container'}, [
-        new Element('h1', {style: 'color: ' + color}, ['simple virtal dom']),
-        new Element('p', ['the count is :' + count]),
+    return new Element('div', {id: 'container'}, [
+        new Element('h1', {style: `color: ${color}`}, ['simple virtal dom']),
+        new Element('p', [`the count is :${count}`]),
         new Element('ul', items)
     ]);
 };
 
 let tree = renderTree();
+console.log(tree);
 let root = tree.render();
 document.body.appendChild(root);
 
-setInterval(function () {
+setInterval(() => {
     let newTree = renderTree();
+
+    // 比较两棵虚拟DOM树的不同
     let patches = diff(tree, newTree);
     console.log(patches);
+
+    // 在真正的DOM元素上应用变更
     patch(root, patches);
 
     tree = newTree;
-}, 10 * 1000);
+}, 1.5 * 1000);
