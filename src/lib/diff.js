@@ -28,7 +28,7 @@ function dfsWalk(oldNode, newNode, index, patches) {
         oldNode.key === newNode.key
     ) {
         // Diff props
-        var propsPatches = diffProps(oldNode, newNode);
+        let propsPatches = diffProps(oldNode, newNode);
         if (propsPatches) {
             currentPatch.push({type: patch.PROPS, props: propsPatches});
         }

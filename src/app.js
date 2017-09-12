@@ -22,8 +22,11 @@ const renderTree = () => {
     ]);
 };
 
+// 构建一个virtual dom
 let tree = renderTree();
 console.log(tree);
+
+// 真正的Dom元素节点
 let root = tree.render();
 document.body.appendChild(root);
 
